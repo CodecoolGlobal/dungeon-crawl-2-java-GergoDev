@@ -20,6 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -43,6 +44,7 @@ public class Main extends Application {
     Label inventoryLabel = new Label();
     private Button pickUpButton = new Button("Pick up item.");
     Stage stage;
+    KeyCode lastKeyEvent;
 
     //trying to make an alert
     public Alert wonGame = new Alert(Alert.AlertType.INFORMATION);
@@ -114,6 +116,56 @@ public class Main extends Application {
         menuLayout.setTop(gameLogo);
         menuLayout.setCenter(settingsLayout);
         HBox.setMargin(backButton, new Insets(10, 10, 10, 10));
+        buttons.setAlignment(Pos.CENTER);
+        Scene scene = new Scene(menuLayout);
+        scene.getStylesheets().add("style.css");
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Dungeon Crawl");
+        primaryStage.show();
+    }
+
+    public void saveScreen(Stage primaryStage, Scene gameScene) throws FileNotFoundException {
+        ImageView selectedImage = new ImageView();
+        Image image1 = new Image(Main.class.getResourceAsStream("/fdc.png"));
+        selectedImage.setImage(image1);
+        HBox gameLogo = new HBox(selectedImage);
+        Button cancelButton = new Button("Cancel");
+        Button saveButton = new Button("Save");
+        cancelButton.setId("allbtn");
+        saveButton.setId("allbtn");
+        HBox buttons = new HBox(cancelButton, saveButton);
+        Text saveLabel = new Text("Save the Game");
+        saveLabel.setId("text");
+        TextField textField = new TextField();
+        textField.setId("input");
+        VBox settingsLayout = new VBox(saveLabel, textField, buttons);
+        settingsLayout.setAlignment(Pos.CENTER);
+        cancelButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            try {
+                primaryStage.setScene(gameScene);
+                primaryStage.setTitle("Dungeon Crawl");
+                primaryStage.show();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        });
+        saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            try {
+                mainMenu(primaryStage);
+            } catch (FileNotFoundException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+            }
+        });
+        gameLogo.setAlignment(Pos.CENTER);
+        HBox.setMargin(selectedImage, new Insets(50, 0, 0, 0));
+        settingsLayout.setSpacing(25);
+        BorderPane menuLayout = new BorderPane();
+        menuLayout.setBackground(new Background(new BackgroundFill(Color.rgb(71, 45, 60), CornerRadii.EMPTY, Insets.EMPTY)));
+        menuLayout.setPrefWidth(1000);
+        menuLayout.setPrefHeight(672);
+        menuLayout.setTop(gameLogo);
+        menuLayout.setCenter(settingsLayout);
+        HBox.setMargin(saveButton, new Insets(10, 10, 10, 10));
         buttons.setAlignment(Pos.CENTER);
         Scene scene = new Scene(menuLayout);
         scene.getStylesheets().add("style.css");
@@ -251,7 +303,17 @@ public class Main extends Application {
                 map.getPlayer().move(1,0);
                 refresh();
                 break;
+            case S:
+                if (lastKeyEvent == KeyCode.CONTROL) {
+                    try {
+                        saveScreen(stage, stage.getScene());
+                    } catch (FileNotFoundException ex) {
+                        System.out.println(ex);
+                    }
+                }
+                break;
         }
+        lastKeyEvent = keyEvent.getCode();
         if(map.getPlayer().isNextMapComing()) {
             String name = map.getPlayer().getName();
             setMap(MapLoader.loadMap("/map2.txt"));

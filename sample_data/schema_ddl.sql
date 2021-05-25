@@ -10,7 +10,9 @@ DROP TABLE IF EXISTS public.player;
 CREATE TABLE public.player (
     id serial NOT NULL PRIMARY KEY,
     player_name text NOT NULL,
+    st integer NOT NULL,
     hp integer NOT NULL,
+    iv text NOT NULL,
     x integer NOT NULL,
     y integer NOT NULL
 );
