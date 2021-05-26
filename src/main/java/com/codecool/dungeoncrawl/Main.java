@@ -1,5 +1,6 @@
 package com.codecool.dungeoncrawl;
 
+import com.codecool.dungeoncrawl.dao.GameDatabaseManager;
 import com.codecool.dungeoncrawl.logic.Cell;
 import com.codecool.dungeoncrawl.logic.CellType;
 import com.codecool.dungeoncrawl.logic.GameMap;
@@ -7,7 +8,9 @@ import com.codecool.dungeoncrawl.logic.MapLoader;
 import com.codecool.dungeoncrawl.logic.actors.Ghost;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.model.GameState;
 import javafx.application.Application;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,6 +33,8 @@ import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Main extends Application {
@@ -45,6 +50,8 @@ public class Main extends Application {
     private Button pickUpButton = new Button("Pick up item.");
     Stage stage;
     KeyCode lastKeyEvent;
+    GameDatabaseManager db = new GameDatabaseManager();
+    String currentMap = "/map.txt";
 
     //trying to make an alert
     public Alert wonGame = new Alert(Alert.AlertType.INFORMATION);
@@ -150,10 +157,22 @@ public class Main extends Application {
             }
         });
         saveButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
-            try {
-                mainMenu(primaryStage);
-            } catch (FileNotFoundException fileNotFoundException) {
-                fileNotFoundException.printStackTrace();
+            boolean isNameExists = db.getAll().stream().anyMatch(gameState -> gameState.getSaveAs().equals(textField.getText()));
+            if(isNameExists) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setContentText("Would you like to overwrite the already existing state?");
+                alert.showAndWait();
+                if (alert.getResult().getText().equals("OK")) {
+                    db.updateGameState(currentMap, textField.getText(), db.savePlayer(map.getPlayer()));
+                    primaryStage.setScene(gameScene);
+                    primaryStage.setTitle("Dungeon Crawl");
+                    primaryStage.show();
+                }
+            } else {
+                db.saveGameState(currentMap, textField.getText(), db.savePlayer(map.getPlayer()));
+                primaryStage.setScene(gameScene);
+                primaryStage.setTitle("Dungeon Crawl");
+                primaryStage.show();
             }
         });
         gameLogo.setAlignment(Pos.CENTER);
@@ -193,6 +212,13 @@ public class Main extends Application {
                 fileNotFoundException.printStackTrace();
             }
         });
+        loadGameButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            try {
+                loadGameMenu(primaryStage);
+            } catch (FileNotFoundException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+            }
+        });
         exitGameButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
             System.exit(0);
         });
@@ -205,6 +231,98 @@ public class Main extends Application {
         BorderPane menuLayout = new BorderPane();
         menuLayout.setCenter(buttons);
         menuLayout.setTop(gameLogo);
+        menuLayout.setBackground(new Background(new BackgroundFill(Color.rgb(71, 45, 60), CornerRadii.EMPTY, Insets.EMPTY)));
+        menuLayout.setPrefWidth(1000);
+        menuLayout.setPrefHeight(672);
+        Scene scene = new Scene(menuLayout);
+        scene.getStylesheets().add("style.css");
+
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Dungeon Crawl");
+        primaryStage.show();
+    }
+
+    public void loadGameMenu(Stage primaryStage) throws FileNotFoundException, RuntimeException {
+        ImageView selectedImage = new ImageView();
+        Image image1 = new Image(Main.class.getResourceAsStream("/fdc.png"));
+        selectedImage.setImage(image1);
+        HBox gameLogo = new HBox(selectedImage);
+        Button backButton = new Button("Back");
+        backButton.setId("allbtn");
+        backButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            try {
+                mainMenu(primaryStage);
+            } catch (FileNotFoundException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+            }
+        });
+
+        VBox buttons = new VBox(backButton);
+        VBox.setMargin(backButton, new Insets(30));
+        gameLogo.setAlignment(Pos.CENTER);
+        HBox.setMargin(selectedImage, new Insets(50, 0, 0, 0));
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setSpacing(10);
+        BorderPane menuLayout = new BorderPane();
+        menuLayout.setTop(gameLogo);
+
+        GridPane savedGameList = new GridPane();
+        savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
+        savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
+        savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
+        savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
+
+        Text nameHeader = new Text("Name");
+        nameHeader.setId("savedGameList");
+        GridPane.setHalignment(nameHeader, HPos.CENTER);
+        savedGameList.add(nameHeader, 1, 1);
+
+        Text dateHeader = new Text("Map");
+        dateHeader.setId("savedGameList");
+        GridPane.setHalignment(dateHeader, HPos.CENTER);
+        savedGameList.add(dateHeader, 2, 1);
+
+        Text playerHeader = new Text("Player");
+        playerHeader.setId("savedGameList");
+        GridPane.setHalignment(playerHeader, HPos.CENTER);
+        savedGameList.add(playerHeader, 3, 1);
+
+        Text loadHeader = new Text("Load");
+        loadHeader.setId("savedGameList");
+        GridPane.setHalignment(loadHeader, HPos.CENTER);
+        savedGameList.add(loadHeader, 4, 1);
+
+        List<GameState> dataFromSQL = db.getAll();
+
+        for(int i=2; i<dataFromSQL.size()+2; i++) {
+            Text column1 = new Text(dataFromSQL.get(i-2).getSaveAs());
+            column1.setId("savedGameList");
+            GridPane.setHalignment(column1, HPos.CENTER);
+            savedGameList.add(column1, 1, i);
+
+            Text column2 = new Text(dataFromSQL.get(i-2).getCurrentMap().equals("/map.txt") ? "First map" : "Second map");
+            column2.setId("savedGameList");
+            GridPane.setHalignment(column2, HPos.CENTER);
+            savedGameList.add(column2, 2, i);
+
+            Text column3 = new Text(dataFromSQL.get(i-2).getPlayer().getPlayerName());
+            column3.setId("savedGameList");
+            GridPane.setHalignment(column3, HPos.CENTER);
+            savedGameList.add(column3, 3, i);
+
+            Button loadButton = new Button("Load Game");
+            int currI = i;
+            loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+                //TODO
+                System.out.println("Clicked");
+            });
+            savedGameList.add(loadButton, 4, i);
+        }
+
+        savedGameList.setAlignment(Pos.CENTER);
+
+        menuLayout.setCenter(savedGameList);
+        menuLayout.setBottom(buttons);
         menuLayout.setBackground(new Background(new BackgroundFill(Color.rgb(71, 45, 60), CornerRadii.EMPTY, Insets.EMPTY)));
         menuLayout.setPrefWidth(1000);
         menuLayout.setPrefHeight(672);
@@ -317,6 +435,7 @@ public class Main extends Application {
         if(map.getPlayer().isNextMapComing()) {
             String name = map.getPlayer().getName();
             setMap(MapLoader.loadMap("/map2.txt"));
+            currentMap = "/map2.txt";
             map.getPlayer().setName(name);
         }
         if(!map.getPlayer().isAlive()) {
@@ -324,6 +443,7 @@ public class Main extends Application {
             try {
                 map = MapLoader.loadMap("/map2.txt");
                 map = MapLoader.loadMap("/map.txt");
+                currentMap = "/map.txt";
                 mainMenu(stage);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -334,6 +454,7 @@ public class Main extends Application {
             try {
                 map = MapLoader.loadMap("/map2.txt");
                 map = MapLoader.loadMap("/map.txt");
+                currentMap = "/map.txt";
                 mainMenu(stage);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

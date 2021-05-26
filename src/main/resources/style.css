@@ -33,3 +33,10 @@
     -fx-fill: white;
     -fx-display-caret: false;
 }
+
+#savedGameList {
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-alignment: center;
+    -fx-fill: white;
+}
