@@ -72,48 +72,6 @@ public class Player extends Actor {
     }
 
 
-        /*if (this.hasTorch) {
-            return "yes";
-        } else {
-            if (cell.getX() > this.getX() - 2 && cell.getX() < this.getX() + 2) {
-                if (cell.getY() > this.getY() - 6 && cell.getY() < this.getY() + 6) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 7 && cell.getY() < this.getY() + 7) {
-                    return "hardly";
-                }
-            } else if (cell.getX() > this.getX() - 3 && cell.getX() < this.getX() + 3) {
-                if (cell.getY() > this.getY() - 5 && cell.getY() < this.getY() + 5) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 6 && cell.getY() < this.getY() + 6) {
-                    return "hardly";
-                }
-            } else if (cell.getX() > this.getX() - 4 && cell.getX() < this.getX() + 4) {
-                if (cell.getY() > this.getY() - 4 && cell.getY() < this.getY() + 4) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 5 && cell.getY() < this.getY() + 5) {
-                    return "hardly";
-                }
-            } else if (cell.getX() > this.getX() - 5 && cell.getX() < this.getX() + 5) {
-                if (cell.getY() > this.getY() - 3 && cell.getY() < this.getY() + 3) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 4 && cell.getY() < this.getY() + 4 ) {
-                    return "hardly";
-                }
-            }   else if (cell.getX() > this.getX() - 6 && cell.getX() < this.getX() + 6) {
-                if (cell.getY() > this.getY() - 2 && cell.getY() < this.getY() + 2) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 3 && cell.getY() < this.getY() + 3 ) {
-                    return "hardly";
-                }
-            } else if (cell.getX() > this.getX() - 7 && cell.getX() < this.getX() + 7) {
-                if (cell.getY() > this.getY() - 1 && cell.getY() < this.getY() + 1) {
-                    return "yes";
-                } else if (cell.getY() > this.getY() - 2 && cell.getY() < this.getY() + 2 ) {
-                    return "hardly";
-                }
-            }
-        }*/
-
     public void itemPickUp() {
         inventory.add(this.getCell().getItem());
         if (this.getCell().getItem() instanceof Sword) {

@@ -316,11 +316,18 @@ public class Main extends Application {
                 //TODO
                 int x = dataFromSQL.get(finalI - 2).getPlayer().getX();
                 int y = dataFromSQL.get(finalI - 2).getPlayer().getY();
-                Player loadedPlayer = new Player(new Cell(map, x, y, CellType.EMPTY));
-                loadedPlayer.setHealth(dataFromSQL.get(finalI - 2).getPlayer().getHp());
-                loadedPlayer.setStrength(dataFromSQL.get(finalI - 2).getPlayer().getSt());
-                map = MapLoader.loadMap(dataFromSQL.get(finalI - 2).getCurrentMap(), loadedPlayer);
+                map = MapLoader.loadMap(dataFromSQL.get(finalI - 2).getCurrentMap());
+
+                map.getPlayer().getCell().setActor(null);
+                Cell[][] newCells = map.getCells();
+                map.getPlayer().setCell(newCells[x][y]);
+                map.getPlayer().getCell().setActor(map.getPlayer());
+                map.setCells(newCells);
+
+                map.getPlayer().setHealth(dataFromSQL.get(finalI - 2).getPlayer().getHp());
+                map.getPlayer().setStrength(dataFromSQL.get(finalI - 2).getPlayer().getSt());
                 map.getPlayer().setName(dataFromSQL.get(finalI - 2).getPlayer().getPlayerName());
+
                 try {
                     gameStart(primaryStage);
                 } catch (Exception exception) {
