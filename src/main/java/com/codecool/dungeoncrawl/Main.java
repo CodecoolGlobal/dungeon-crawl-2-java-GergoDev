@@ -277,6 +277,7 @@ public class Main extends Application {
         savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
         savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
         savedGameList.getColumnConstraints().add(new ColumnConstraints(150));
+        savedGameList.getColumnConstraints().add(new ColumnConstraints(250));
 
         Text nameHeader = new Text("Name");
         nameHeader.setId("savedGameList");
@@ -292,11 +293,6 @@ public class Main extends Application {
         playerHeader.setId("savedGameList");
         GridPane.setHalignment(playerHeader, HPos.CENTER);
         savedGameList.add(playerHeader, 3, 1);
-
-        Text loadHeader = new Text("Load");
-        loadHeader.setId("savedGameList");
-        GridPane.setHalignment(loadHeader, HPos.CENTER);
-        savedGameList.add(loadHeader, 4, 1);
 
         List<GameState> dataFromSQL = db.getAll();
 
