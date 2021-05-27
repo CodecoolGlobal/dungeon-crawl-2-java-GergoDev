@@ -311,9 +311,21 @@ public class Main extends Application {
             savedGameList.add(column3, 3, i);
 
             Button loadButton = new Button("Load Game");
-            int currI = i;
+            int finalI = i;
             loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
                 //TODO
+                int x = dataFromSQL.get(finalI - 2).getPlayer().getX();
+                int y = dataFromSQL.get(finalI - 2).getPlayer().getY();
+                Player loadedPlayer = new Player(new Cell(map, x, y, CellType.EMPTY));
+                loadedPlayer.setHealth(dataFromSQL.get(finalI - 2).getPlayer().getHp());
+                loadedPlayer.setStrength(dataFromSQL.get(finalI - 2).getPlayer().getSt());
+                map = MapLoader.loadMap(dataFromSQL.get(finalI - 2).getCurrentMap(), loadedPlayer);
+                map.getPlayer().setName(dataFromSQL.get(finalI - 2).getPlayer().getPlayerName());
+                try {
+                    gameStart(primaryStage);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
                 System.out.println("Clicked");
             });
             savedGameList.add(loadButton, 4, i);
