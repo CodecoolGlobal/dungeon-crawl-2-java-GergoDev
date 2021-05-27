@@ -8,6 +8,7 @@ import com.codecool.dungeoncrawl.logic.MapLoader;
 import com.codecool.dungeoncrawl.logic.actors.Ghost;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.items.*;
 import com.codecool.dungeoncrawl.model.GameState;
 import javafx.application.Application;
 import javafx.geometry.HPos;
@@ -34,6 +35,7 @@ import javafx.stage.Stage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -327,6 +329,8 @@ public class Main extends Application {
                 map.getPlayer().setHealth(dataFromSQL.get(finalI - 2).getPlayer().getHp());
                 map.getPlayer().setStrength(dataFromSQL.get(finalI - 2).getPlayer().getSt());
                 map.getPlayer().setName(dataFromSQL.get(finalI - 2).getPlayer().getPlayerName());
+                ArrayList<Item> inventoryToAdd = getInventoryByString(dataFromSQL.get(finalI - 2).getPlayer().getIv(), map.getPlayer().getCell(), map.getPlayer());
+                map.getPlayer().setInventory(inventoryToAdd);
 
                 try {
                     gameStart(primaryStage);
@@ -351,6 +355,32 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Dungeon Crawl");
         primaryStage.show();
+    }
+
+    private ArrayList<Item> getInventoryByString(String iv, Cell cell, Player player) {
+        String[] inventoryArray = iv.split("\n");
+        ArrayList<Item> result = new ArrayList<>();
+        for(String item: inventoryArray) {
+            switch(item) {
+                case "* torch":
+                    result.add(new Torch(cell));
+                    player.setHasTorch(true);
+                    break;
+                case "* sword":
+                    result.add(new Sword(cell));
+                    break;
+                case "* key":
+                    result.add(new Key(cell));
+                    player.setHasKey(true);
+                    break;
+                case "* helmet":
+                    result.add(new Helmet(cell));
+                    break;
+            }
+            cell.setItem(null);
+        }
+
+        return result;
     }
 
     public void gameStart(Stage primaryStage) throws Exception{

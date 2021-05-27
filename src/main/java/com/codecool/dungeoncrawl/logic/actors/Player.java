@@ -5,12 +5,15 @@ import com.codecool.dungeoncrawl.logic.items.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringJoiner;
 
 public class Player extends Actor {
 
     public boolean hasTorch = false;
     public boolean hasKey = false;
+
+
     public ArrayList<Item> inventory = new ArrayList<>();
 
     public Player(Cell cell) {
@@ -93,6 +96,10 @@ public class Player extends Actor {
             if (item != null) sj.add("* " + item.getTileName());
         }
         return sj.toString();
+    }
+
+    public void setInventory(ArrayList<Item> inventory) {
+        this.inventory = inventory;
     }
 
 
