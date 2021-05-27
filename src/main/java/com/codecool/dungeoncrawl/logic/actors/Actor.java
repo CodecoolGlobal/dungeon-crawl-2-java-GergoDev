@@ -8,6 +8,8 @@ import java.sql.SQLOutput;
 
 public abstract class Actor implements Drawable {
     private String name;
+
+
     private Cell cell;
     private int health;
     private int strength;
@@ -70,6 +72,10 @@ public abstract class Actor implements Drawable {
     public void setHealth(int health) { this.health = health; }
 
     public Cell getCell() { return cell; }
+
+    public void setCell(Cell cell) {
+        this.cell = cell;
+    }
 
     public int getX() { return cell.getX(); }
 

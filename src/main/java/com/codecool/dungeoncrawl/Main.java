@@ -8,7 +8,10 @@ import com.codecool.dungeoncrawl.logic.MapLoader;
 import com.codecool.dungeoncrawl.logic.actors.Ghost;
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.items.*;
 import com.codecool.dungeoncrawl.model.GameState;
+import com.codecool.dungeoncrawl.model.PlayerModel;
+import com.codecool.dungeoncrawl.serialize.SerializationHandler;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -29,11 +32,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -314,19 +320,8 @@ public class Main extends Application {
             int finalI = i;
             loadButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
                 //TODO
-                int x = dataFromSQL.get(finalI - 2).getPlayer().getX();
-                int y = dataFromSQL.get(finalI - 2).getPlayer().getY();
-                Player loadedPlayer = new Player(new Cell(map, x, y, CellType.EMPTY));
-                loadedPlayer.setHealth(dataFromSQL.get(finalI - 2).getPlayer().getHp());
-                loadedPlayer.setStrength(dataFromSQL.get(finalI - 2).getPlayer().getSt());
-                map = MapLoader.loadMap(dataFromSQL.get(finalI - 2).getCurrentMap(), loadedPlayer);
-                map.getPlayer().setName(dataFromSQL.get(finalI - 2).getPlayer().getPlayerName());
-                try {
-                    gameStart(primaryStage);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-                System.out.println("Clicked");
+                GameState gs = dataFromSQL.get(finalI - 2);
+                loadGameByState(gs, primaryStage);
             });
             savedGameList.add(loadButton, 4, i);
         }
@@ -346,7 +341,62 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    private void loadGameByState(GameState gs, Stage primaryStage) {
+        int x = gs.getPlayer().getX();
+        int y = gs.getPlayer().getY();
+        map = MapLoader.loadMap(gs.getCurrentMap());
+
+        map.getPlayer().getCell().setActor(null);
+        Cell[][] newCells = map.getCells();
+        map.getPlayer().setCell(newCells[x][y]);
+        map.getPlayer().getCell().setActor(map.getPlayer());
+        map.setCells(newCells);
+
+        map.getPlayer().setHealth(gs.getPlayer().getHp());
+        map.getPlayer().setStrength(gs.getPlayer().getSt());
+        map.getPlayer().setName(gs.getPlayer().getPlayerName());
+        ArrayList<Item> inventoryToAdd = getInventoryByString(gs.getPlayer().getIv(), map.getPlayer().getCell(), map.getPlayer());
+        map.getPlayer().setInventory(inventoryToAdd);
+
+        try {
+            gameStart(primaryStage);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        System.out.println("Clicked");
+    }
+
+    private ArrayList<Item> getInventoryByString(String iv, Cell cell, Player player) {
+        String[] inventoryArray = iv.split("\n");
+        ArrayList<Item> result = new ArrayList<>();
+        for(String item: inventoryArray) {
+            switch(item) {
+                case "* torch":
+                    result.add(new Torch(cell));
+                    player.setHasTorch(true);
+                    break;
+                case "* sword":
+                    result.add(new Sword(cell));
+                    break;
+                case "* key":
+                    result.add(new Key(cell));
+                    player.setHasKey(true);
+                    break;
+                case "* helmet":
+                    result.add(new Helmet(cell));
+                    break;
+            }
+            cell.setItem(null);
+        }
+
+        return result;
+    }
+
     public void gameStart(Stage primaryStage) throws Exception{
+        Button exportButton = new Button("Export Game");
+        exportButton.setFocusTraversable(false);
+        Button importButton = new Button("Import Game");
+        importButton.setFocusTraversable(false);
         setAlert(wonGame, "You won the game! Congrats " + map.getPlayer().getName());
         setAlert(lostGame, "Game over, " + map.getPlayer().getName()+ " has died.");
         canvas.setFocusTraversable(false);
@@ -362,7 +412,9 @@ public class Main extends Application {
         ui.add(strengthLabel, 1, 2);
         ui.add(new Label("INVENTORY"), 0, 3);
         ui.add(inventoryLabel, 0, 4);
-        ui.add(pickUpButton, 0, 20);
+        ui.add(pickUpButton, 0, 5);
+        ui.add(exportButton, 0, 6);
+        ui.add(importButton, 1, 6);
         hideButton();
 
         BorderPane borderPane = new BorderPane();
@@ -377,6 +429,19 @@ public class Main extends Application {
             map.getPlayer().itemPickUp();
             refresh();
         });
+
+        exportButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            FileChooser fileChooser = new FileChooser();
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
+            System.out.println(selectedFile);
+            SerializationHandler.serializeObj(new GameState(currentMap, "how.json", new PlayerModel(map.getPlayer())));
+        });
+
+        importButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
+            GameState gameStateFromFile = SerializationHandler.deSerializeObj("how.json");
+            loadGameByState(gameStateFromFile, primaryStage);
+        });
+
         primaryStage.setTitle("Dungeon Crawl");
         primaryStage.show();
     }
