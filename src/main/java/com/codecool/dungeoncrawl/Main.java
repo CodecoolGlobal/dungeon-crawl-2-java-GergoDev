@@ -432,14 +432,30 @@ public class Main extends Application {
 
         exportButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
             FileChooser fileChooser = new FileChooser();
-            File selectedFile = fileChooser.showOpenDialog(primaryStage);
-            System.out.println(selectedFile);
-            SerializationHandler.serializeObj(new GameState(currentMap, "how.json", new PlayerModel(map.getPlayer())));
+            File selectedFile = fileChooser.showSaveDialog(primaryStage);
+            SerializationHandler.serializeObj(new GameState(currentMap, selectedFile.toString(), new PlayerModel(map.getPlayer())));
         });
 
         importButton.addEventFilter(MouseEvent.MOUSE_CLICKED, (e) -> {
-            GameState gameStateFromFile = SerializationHandler.deSerializeObj("how.json");
-            loadGameByState(gameStateFromFile, primaryStage);
+            String filePath = "";
+            while(true) {
+                FileChooser fileChooser = new FileChooser();
+                File selectedFile = fileChooser.showOpenDialog(primaryStage);
+                filePath = selectedFile.toString();
+                String fileExtension = filePath.substring(filePath.lastIndexOf(".") + 1);
+
+                if (!fileExtension.equals("json")) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setContentText("IMPORT ERROR! Unfortunately the given file is in wrong format. Please try another one!");
+                    alert.showAndWait();
+                    if(alert.getResult().getText().equals("Cancel"))
+                        break;
+                } else {
+                    GameState gameStateFromFile = SerializationHandler.deSerializeObj(filePath);
+                    loadGameByState(gameStateFromFile, primaryStage);
+                    break;
+                }
+            }
         });
 
         primaryStage.setTitle("Dungeon Crawl");
@@ -505,6 +521,16 @@ public class Main extends Application {
                     } catch (FileNotFoundException ex) {
                         System.out.println(ex);
                     }
+                }
+                break;
+            case ESCAPE:
+                try {
+                    map = MapLoader.loadMap("/map2.txt");
+                    map = MapLoader.loadMap("/map.txt");
+                    currentMap = "/map.txt";
+                    mainMenu(stage);
+                } catch (FileNotFoundException e) {
+                    System.out.println(e);
                 }
                 break;
         }
