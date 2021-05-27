@@ -14,6 +14,10 @@ public class Player extends Actor {
     public boolean hasKey = false;
 
 
+    public ArrayList<Item> getInventory() {
+        return inventory;
+    }
+
     public ArrayList<Item> inventory = new ArrayList<>();
 
     public Player(Cell cell) {

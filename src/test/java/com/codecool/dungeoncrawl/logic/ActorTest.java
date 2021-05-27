@@ -2,7 +2,11 @@ package com.codecool.dungeoncrawl.logic;
 
 import com.codecool.dungeoncrawl.logic.actors.Player;
 import com.codecool.dungeoncrawl.logic.actors.Skeleton;
+import com.codecool.dungeoncrawl.logic.items.Item;
+import com.codecool.dungeoncrawl.logic.items.Key;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +34,7 @@ class ActorTest {
         assertEquals(1, player.getY());
     }
 
-    @Test
+    @Test()
     void cannotMoveOutOfMap() {
         Player player = new Player(gameMap.getCell(2, 1));
         player.move(1, 0);
@@ -50,5 +54,28 @@ class ActorTest {
         assertEquals(2, skeleton.getX());
         assertEquals(1, skeleton.getY());
         assertEquals(skeleton, gameMap.getCell(2, 1).getActor());
+    }
+
+    @Test
+    void playerPicksUpItemEndsInInventory(){
+        Player player = new Player(gameMap.getCell(1, 1));
+        player.getCell().setItem(new Key(player.getCell()));
+        player.itemPickUp();
+        String expected = "* key";
+        assertEquals(expected, player.inventoryToString());
+    }
+
+    @Test
+    void playerCanSeeIfHasTorch(){
+        Player player = new Player(gameMap.getCell(1, 1));
+        player.setHasTorch(true);
+        assertTrue(true, player.canSee(player.getCell()));
+    }
+
+    @Test
+    void isNextMapComingIfStandingOnAStair(){
+        Player player = new Player(gameMap.getCell(1, 1));
+        player.getCell().setType(CellType.STAIRS);
+        assertTrue(player.isNextMapComing());
     }
 }

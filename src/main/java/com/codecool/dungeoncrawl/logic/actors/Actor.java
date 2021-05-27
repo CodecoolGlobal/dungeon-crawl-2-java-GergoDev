@@ -30,6 +30,7 @@ public abstract class Actor implements Drawable {
 
     public void move(int dx, int dy) {
         Cell nextCell = cell.getNeighbor(dx, dy);
+        if(nextCell == null) return;
         if (this.name != null && (this.name.equals("Gergo") || this.name.equals("Martin") || this.name.equals("Balazs")) && nextCell.getActor() == null && nextCell.getType() != CellType.WIFE) {
             cell.setActor(null);
             nextCell.setActor(this);
