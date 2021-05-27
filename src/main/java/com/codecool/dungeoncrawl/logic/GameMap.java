@@ -23,6 +23,10 @@ public class GameMap {
         return cells;
     }
 
+    public void setCells(Cell[][] cells) {
+        this.cells = cells;
+    }
+
     private Cell[][] cells;
 
     private Player player;
