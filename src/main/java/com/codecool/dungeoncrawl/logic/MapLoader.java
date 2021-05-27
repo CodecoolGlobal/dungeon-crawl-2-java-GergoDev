@@ -107,7 +107,6 @@ public class MapLoader {
         scanner.nextLine(); // empty line
 
         GameMap map = new GameMap(width, height, CellType.EMPTY, false);
-        map.setPlayer(player);
         for (int y = 0; y < height; y++) {
             String line = scanner.nextLine();
             for (int x = 0; x < width; x++) {
@@ -178,6 +177,9 @@ public class MapLoader {
                 }
             }
         }
+        map.setPlayer(player);
+//        map.getCell(player.getX(), player.getY()).setActor(player);
+        map.getCell(player.getX(), player.getY()).setType(CellType.FLOOR);
         return map;
     }
 
