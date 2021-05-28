@@ -19,10 +19,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -34,6 +31,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.w3c.dom.css.RGBColor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -398,24 +396,35 @@ public class Main extends Application {
         canvas.setFocusTraversable(false);
         pickUpButton.setFocusTraversable(false);
         GridPane ui = new GridPane();
-        ui.setPrefWidth(200);
+        GridPane buttons = new GridPane();
+        importButton.setId("allbtn");
+        exportButton.setId("allbtn");
+        pickUpButton.setId("allbtn");
+
+
+        ui.setPrefHeight(100);
+        buttons.setPrefHeight(50);
         ui.setPadding(new Insets(10));
         ui.add(new Label("Name: "), 0, 0);
         ui.add(new Label(map.getPlayer().getName()), 1, 0);
         ui.add(new Label("Health: "), 0, 1);
+        ui.add(new Label("          "), 2, 1);
         ui.add(healthLabel, 1, 1);
         ui.add(new Label("Strength: "), 0, 2);
         ui.add(strengthLabel, 1, 2);
-        ui.add(new Label("INVENTORY"), 0, 3);
-        ui.add(inventoryLabel, 0, 4);
-        ui.add(pickUpButton, 0, 5);
-        ui.add(exportButton, 0, 6);
-        ui.add(importButton, 1, 6);
+        ui.add(new Label("INVENTORY"), 3, 0);
+        ui.add(inventoryLabel, 3, 1);
+        buttons.add(pickUpButton, 3, 0);
+        buttons.add(exportButton, 2, 0);
+        buttons.add(importButton, 1, 0);
         hideButton();
+        ui.setBackground(new Background(new BackgroundFill(Color.rgb(21, 10, 17), new CornerRadii(0), Insets.EMPTY)));
+        buttons.setBackground(new Background(new BackgroundFill(Color.rgb(21, 10, 17), new CornerRadii(0), Insets.EMPTY)));
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(canvas);
-        borderPane.setRight(ui);
+        borderPane.setTop(ui); // ez lesz a setTop
+        borderPane.setBottom(buttons); // ebben vannak nyilvan a gombok
 
         Scene scene = new Scene(borderPane);
         primaryStage.setScene(scene);
@@ -453,7 +462,7 @@ public class Main extends Application {
                 }
             }
         });
-
+        scene.getStylesheets().add("style.css");
         primaryStage.setTitle("Dungeon Crawl");
         primaryStage.show();
     }
